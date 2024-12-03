@@ -2,7 +2,10 @@ package com.project.quizitup.entity;
 
 import java.util.List;
 
+import com.project.quizitup.entity.converter.IntListConverter;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,10 +22,17 @@ public class Attempt {
     @Column(name="attendee_name",nullable=false)
     private String attendeeName;
 
+    @Convert(converter=IntListConverter.class)
     @Column(name="answer_set",nullable=false)
     private List<Integer> answerSet;
 
-    
+    @Column(name="secured_score")
+    private int securedScore;
+
+    @Column(name="total_score")
+    private int totalScore;
+
+
     // Constructors
     public Attempt() {
     }
@@ -68,6 +78,23 @@ public class Attempt {
         this.answerSet = answerSet;
     }
 
-    
+    public int getSecuredScore() {
+        return securedScore;
+    }
+
+
+    public void setSecuredScore(int securedScore) {
+        this.securedScore = securedScore;
+    }
+
+
+    public int getTotalScore() {
+        return totalScore;
+    }
+
+
+    public void setTotalScore(int totalScore) {
+        this.totalScore = totalScore;
+    }    
 
 }

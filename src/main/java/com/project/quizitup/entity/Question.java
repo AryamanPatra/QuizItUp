@@ -2,7 +2,10 @@ package com.project.quizitup.entity;
 
 import java.util.List;
 
+import com.project.quizitup.entity.converter.StringListConverter;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,8 +19,12 @@ public class Question {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int id;
+
+    @Column(nullable=false)
     private String question;
-    @Column(name="choice_set")
+
+    @Convert(converter=StringListConverter.class)
+    @Column(name="choice_set",nullable=false)
     private List<String> choiceSet;
 
 

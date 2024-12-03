@@ -2,7 +2,10 @@ package com.project.quizitup.entity;
 
 import java.util.List;
 
+import com.project.quizitup.entity.converter.IntListConverter;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,27 +13,31 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="quiz_tbl")
+@Table(name = "quiz_tbl")
 public class Quiz {
-    
+
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name="quiz_name",nullable=false,unique=true)
+    @Column(name = "quiz_name", nullable = false, unique = true)
     private String quizName;
-    @Column(name="creator_name",nullable=false,unique=false)
+
+    @Column(name = "creator_name", nullable = false, unique = false)
     private String creatorName;
-    @Column(name="question_set",nullable=false)
+
+    @Convert(converter=IntListConverter.class)
+    @Column(name = "question_set", nullable = false)
     private List<Integer> questionSet;
-    @Column(name="solution_set",nullable=false)
+
+    @Convert(converter=IntListConverter.class)
+    @Column(name = "solution_set", nullable = false)
     private List<Integer> solutionSet;
 
-    @Column(name="ref_id",nullable=false,unique=true)
-    @GeneratedValue(strategy=GenerationType.UUID)
-    private int refId;
+    @Column(name = "ref_id", nullable = false, unique = true)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String refId;
 
-    
     public Quiz() {
     }
 
@@ -82,14 +89,12 @@ public class Quiz {
         this.solutionSet = solutionSet;
     }
 
-    public int getRefId() {
+    public String getRefId() {
         return refId;
     }
 
-    public void setRefId(int refId) {
+    public void setRefId(String refId) {
         this.refId = refId;
     }
-
-
 
 }
