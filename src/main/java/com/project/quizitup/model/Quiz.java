@@ -50,4 +50,8 @@ public class Quiz {
     @Column(name="reference_id",nullable=false,unique=true)
     private String referenceId;
 
+    @OneToOne
+    @JoinColumn(name="analytics_id")
+    private Analytics analytics; // Reference to Analytics of the quiz
+
 }
