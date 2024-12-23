@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Quiz - QuizItUp</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        let quizzes = [];
+
+        // Fetch quizzes from the server
+        async function fetchQuizzes() {
+            try {
+                const response = await fetch('/quizApi/getAllQuizzes');
+                quizzes = await response.json();
+                displayQuizzes();
+            } catch (error) {
+                console.error('Error fetching quizzes:', error);
+            }
+        }
+
+        // Display quizzes in a list
+        function displayQuizzes() {
+            const quizListContainer = document.getElementById('quizList');
+            quizListContainer.innerHTML = ''; // Clear existing quizzes
+
+            quizzes.forEach(quiz => {
+                const quizItem = document.createElement('div');
+                quizItem.innerHTML = `
+                    <h3>${quiz.title}</h3>
+                    <p>${quiz.description}</p>
+                    <button onclick="selectQuiz(${quiz.id})">Select</button>
+                `;
+                quizListContainer.appendChild(quizItem);
+            });
+        }
+
+        // Redirect to quiz attempt page
+        function selectQuiz(quizId) {
+            window.location.href = `quizattempt.html?quizId=${quizId}`;
+        }
+
+        // Call fetchQuizzes when the page loads
+        window.onload = fetchQuizzes;
+    </script>
+</head>
+<body>
+    <h1>Select a Quiz</h1>
+    <div id="quizList"></div>
+</body>
+</html>

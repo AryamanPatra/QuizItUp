@@ -27,6 +27,11 @@ public class QuizController {
         return quizService.getAllQuizzes();
     }
 
+    @GetMapping("/getQuizById/{id}")
+    public Quiz getQuizById(@PathVariable int id) {
+        return quizService.getQuizById(id);
+    }
+
     @PostMapping("/saveQuiz")
     public Quiz saveQuiz(@RequestBody Quiz quiz) {
         return quizService.saveQuiz(quiz);

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -114,8 +115,13 @@
             const drawer = document.querySelector('.nav-drawer');
             drawer.classList.toggle('active');
         }
+        function logout() {
+            localStorage.removeItem('userId'); // Clear user ID
+            window.location.href = 'index.html'; // Redirect to home or login page
+        }
     </script>
 </head>
+
 <body>
     <header>
         <div>
@@ -131,10 +137,11 @@
     </div>
 
     <div class="tiles">
-        <div class="tile" onclick="window.location.href='create_quiz.html'">Create Quiz</div>
-        <div class="tile" onclick="window.location.href='attend_quiz.html'">Attend Quiz</div>
+        <div class="tile" onclick="window.location.href='quizcreator.html'">Create Quiz</div>
+        <div class="tile" onclick="window.location.href='quizselection.html'">Attend Quiz</div>
         <div class="tile" onclick="window.location.href='analytics.html'">Analytics</div>
         <div class="tile" onclick="window.location.href='result.html'">Results</div>
     </div>
 </body>
+
 </html>

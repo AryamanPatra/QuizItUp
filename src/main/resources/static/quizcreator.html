@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Quiz - QuizItUp</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- <style>
+        /* Global Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            text-align: center;
+        }
+
+        .form-container h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+        }
+
+        .form-container input,
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-container button {
+            background: #1e3c72;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .form-container button:hover {
+            background: #162b50;
+        }
+
+        .question-list {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .question-list label {
+            display: block;
+            margin: 5px 0;
+        }
+    </style> -->
+    <script>
+        let questions = [];
+
+        
+        let currentUser = null;
+
+        // Fetch user data based on user ID
+        async function fetchUser() {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                try {
+                    const response = await fetch(`/userApi/getUser /${userId}`);
+                    if (response.ok) {
+                        currentUser = await response.json();
+                        console.log('Current User:', currentUser);
+                    } else {
+                        console.error('Failed to fetch user data.');
+                    }
+                } catch (error) {
+                    console.error('Error fetching user:', error);
+                }
+            } else {
+                console.log('No user is logged in.');
+                // Optionally redirect to login page
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Call fetchUser  when the page loads
+        window.onload = fetchUser;
+
+
+        // Fetch questions from the server
+        async function fetchQuestions() {
+            try {
+                const response = await fetch('/questionApi/allQuestions');
+                questions = await response.json();
+                populateQuestionList();
+            } catch (error) {
+                console.error('Error fetching questions:', error);
+            }
+        }
+
+        // Populate the question list with checkboxes
+        function populateQuestionList() {
+            const questionListContainer = document.getElementById('questionList');
+            questionListContainer.innerHTML = ''; // Clear existing questions
+
+            questions.forEach(question => {
+                const label = document.createElement('label');
+                label.innerHTML = `
+                    <input type="checkbox" value="${question.id}" class="questionCheckbox">
+                    ${question.questionTitle}
+                `;
+                questionListContainer.appendChild(label);
+            });
+        }
+
+        // Create a new question
+        async function createQuestion() {
+            const questionTitle = document.getElementById('newQuestionTitle').value;
+            const choiceA = document.getElementById('choiceA').value;
+            const choiceB = document.getElementById('choiceB').value;
+            const choiceC = document.getElementById('choiceC').value;
+            const choiceD = document.getElementById('choiceD').value;
+            const correctAnswer = document.getElementById('correctAnswer').value;
+
+            const newQuestion = {
+                questionTitle,
+                choiceA,
+                choiceB,
+                choiceC,
+                choiceD,
+                correctAnswer
+            };
+
+            try {
+                const response = await fetch('/questionApi/saveQuestion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newQuestion)
+                });
+
+                if (response.ok) {
+                    alert('Question created successfully!');
+                    fetchQuestions(); // Refresh the question list
+                } else {
+                    alert('Failed to create question.');
+                }
+            } catch (error) {
+                console.error('Error creating question:', error);
+            }
+        }
+
+        // Create a new quiz
+        async function createQuiz() {
+            const title = document.getElementById('quizTitle').value;
+            const description = document.getElementById('quizDescription').value;
+            const duration = document.getElementById('quizDuration').value;
+            const enableNegativeMarking = document.getElementById('enableNegativeMarking').checked;
+            const enableShuffle = document.getElementById('enableShuffle').checked;
+
+            // Get selected question IDs
+            const selectedQuestionIds = Array.from(document.querySelectorAll('.questionCheckbox:checked')).map(checkbox => parseInt(checkbox.value, 10));
+
+            // Fetch full Question objects based on selected IDs
+            const selectedQuestions = await Promise.all(selectedQuestionIds.map(async (id) => {
+                const response = await fetch(`/questionApi/getQuestion/${id}`); // Adjust the endpoint as necessary
+                return response.json();
+            }));
+
+            const quizData = {
+                title,
+                description,
+                duration,
+                enableNegativeMarking,
+                enableShuffle,
+                creator: currentUser ,
+                questions: selectedQuestions // Now this is an array of Question objects
+            };
+
+            try {
+                const response = await fetch('/quizApi/saveQuiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(quizData)
+                });
+
+                if (response.ok) {
+                    alert('Quiz created successfully!');
+                    window.location.href = 'home.html'; // Redirect to home page
+                } else {
+                    alert('Failed to create quiz.');
+                }
+            } catch (error) {
+                console.error('Error creating quiz:', error);
+            }
+        }
+
+        // Call fetchQuestions when the page loads
+        window.onload = fetchQuestions;
+    </script>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>Create Quiz</h2>
+        <input type="text" id="quizTitle" placeholder="Quiz Title" required>
+        <input type="text" id="quizDescription" placeholder="Quiz Description" required>
+        <input type="number" id="quizDuration" placeholder="Duration (in minutes)" required>
+        <label>
+            <input type="checkbox" id="enableNegativeMarking"> Enable Negative Marking
+        </label>
+        <label>
+            <input type="checkbox" id="enableShuffle"> Enable Shuffle
+        </label>
+
+        <h3>Select Questions</h3>
+        <div id="questionList" class="question-list">
+            <!-- Checkboxes for questions will be populated here -->
+        </div>
+
+        <h3>Create New Question</h3>
+        <input type="text" id="newQuestionTitle" placeholder="Question Title" required>
+        <input type="text" id="choiceA" placeholder="Choice A" required>
+        <input type="text" id="choiceB" placeholder="Choice B" required>
+        <input type="text" id="choiceC" placeholder="Choice C" required>
+        <input type="text" id="choiceD" placeholder="Choice D" required>
+        <input type="text" id="correctAnswer" placeholder="Correct Answer" required>
+        <button onclick="createQuestion()">Create Question</button>
+
+        <button onclick="createQuiz()">Create Quiz</button>
+    </div>
+</body>
+
+</html>
+// Get selected

@@ -39,5 +39,9 @@ public class UserService {
         }
         return "Not deleted";
     }
+
+    public User getUser(int id) {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    }
     
 }

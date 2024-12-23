@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attempt Quiz - QuizItUp</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        let questions = [];
+        let timer;
+        let timeRemaining;
+
+        // Fetch quiz questions based on quizId
+        async function fetchQuizQuestions() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const quizId = urlParams.get('quizId');
+
+            try {
+                const response = await fetch(`/quizApi/getQuizById/${quizId}`);
+                const quiz = await response.json();
+                questions = quiz.questions; // Get the list of questions from the quiz
+                displayQuestions();
+            } catch (error) {
+                console.error('Error fetching quiz:', error);
+            }
+        }
+
+        // Display questions and start timer
+        function displayQuestions() {
+            const questionContainer = document.getElementById('questionContainer');
+            questionContainer.innerHTML = ''; // Clear existing questions
+
+            questions.forEach((question, index) => {
+                const questionItem = document.createElement('div');
+                questionItem.innerHTML = `
+                    <h3>${index + 1}. ${question.questionTitle}</h3>
+                    <label><input type="radio" name="question${index}" value="${question.choiceA}">${question.choiceA}</label>
+                    <label><input type="radio" name="question${index}" value="${question.choiceB}">${question.choiceB}</label>
+                    <label><input type="radio" name="question${index}" value="${question.choiceC}">${question.choiceC}</label>
+                    <label><input type="radio" name="question${index}" value="${question.choiceD}">${question.choiceD}</label>
+                `;
+                questionContainer.appendChild(questionItem);
+            });
+
+            // Start timer
+            timeRemaining = 60 * questions.length; // Assuming each question has 1 minute
+            startTimer();
+        }
+
+        // Start countdown timer
+        function startTimer() {
+            timer = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timer);
+                    alert('Time is up!');
+                    submitQuiz();
+                } else {
+                    timeRemaining--;
+                    document.getElementById('timer').innerText = `Time Remaining: ${Math.floor(timeRemaining / 60)}:${timeRemaining % 60}`;
+                }
+            }, 1000);
+        }
+
+        // Submit quiz and save results
+        async function submitQuiz() {
+            clearInterval(timer);
+            const results = questions.map((question, index) => {
+                const selectedAnswer = document.querySelector(`input[name="question${index}"]:checked`);
+                return {
+                    questionId: question.id,
+                    selectedAnswer: selectedAnswer ? selectedAnswer.value : null
+                };
+            });
+        
+            const score = calculateScore(results);
+            const resultData = {
+                attendeeUsername: "currentUser ", // Replace with actual username
+                score: score,
+                totalScore: questions.length,
+                timeTaken: 60 * questions.length - timeRemaining,
+                correctAnswers: results.filter(result => {
+                    const question = questions.find(q => q.id === result.questionId);
+                    return question && result.selectedAnswer === question.correctAnswer;
+                }).length,
+                incorrectAnswers: questions.length - score
+            };
+        
+            // Save result data to local storage
+            localStorage.setItem('quizResult', JSON.stringify(resultData));
+        
+            try {
+                const response = await fetch('/resultApi/saveResult', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(resultData)
+                });
+        
+                if (response.ok) {
+                    alert('Quiz submitted successfully!');
+                    window.location.href = 'result.html'; // Redirect to results page
+                } else {
+                    alert('Failed to submit quiz.');
+                }
+            } catch (error) {
+                console.error('Error submitting quiz:', error);
+            }
+        }
+
+        // Calculate score based on selected answers
+        function calculateScore(results) {
+            let score = 0;
+            results.forEach(result => {
+                const question = questions.find(q => q.id === result.questionId);
+                if (question && result.selectedAnswer === question.correctAnswer) {
+                    score++;
+                }
+            });
+            return score;
+        }
+
+        // Call fetchQuizQuestions when the page loads
+        window.onload = fetchQuizQuestions;
+    </script>
+</head>
+
+<body>
+    <h1>Attempt Quiz</h1>
+    <div id="timer">Time Remaining: 0:00</div>
+    <div id="questionContainer"></div>
+    <button onclick="submitQuiz()">Submit Quiz</button>
+</body>
+
+</html>

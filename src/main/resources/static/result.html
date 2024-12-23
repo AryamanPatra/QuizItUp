@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results - QuizItUp</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="QuizItUp Logo">
+        <h1>QuizItUp</h1>
+    </header>
+
+    <div class="container">
+        <h2>Quiz Results</h2>
+        <div class="result-details" style="color: #1e3c72;">
+            <p>Score: <span id="score"></span></p>
+            <p>Correct Answers: <span id="correctAnswers"></span></p>
+            <p>Incorrect Answers: <span id="incorrectAnswers"></span></p>
+            <p>Time Taken: <span id="timeTaken"></span></p>
+            <p>Percentage: <span id="percentage"></span>%</p>
+        </div>
+        <button onclick="exitQuiz()">Exit</button>
+    </div>
+
+    <script>
+        // Assuming you have the result data available in local storage or passed from the previous page
+        const resultData = JSON.parse(localStorage.getItem('quizResult'));
+
+        if (resultData) {
+            document.getElementById('score').innerText = resultData.score;
+            document.getElementById('correctAnswers').innerText = resultData.correctAnswers;
+            document.getElementById('incorrectAnswers').innerText = resultData.incorrectAnswers;
+            document.getElementById('timeTaken').innerText = resultData.timeTaken;
+            document.getElementById('percentage').innerText = ((resultData.score / resultData.totalScore) * 100).toFixed(2);
+        } else {
+            // Handle case where result data is not available
+            alert('No result data found.');
+            window.location.href = 'home.html'; // Redirect to home if no data
+        }
+
+        function exitQuiz() {
+            window.location.href = 'home.html'; // Redirect to home page
+        }
+    </script>
+</body>
+</html>

@@ -22,6 +22,10 @@ public class QuestionService {
         return questionRepository.findAll();
     }
 
+    public Question getQuestionById(int id) {
+        return questionRepository.findById(id).orElse(null);
+    }
+
     public Question updateQuestion(int id, Question question) {
         Question existingQuestion = questionRepository.findById(id).orElseThrow(() -> new RuntimeException("Question not found"));
         existingQuestion.setQuestionTitle(question.getQuestionTitle());
